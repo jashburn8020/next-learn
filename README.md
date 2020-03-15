@@ -388,6 +388,24 @@ export default function Index() {
 
 # Deploying a Next.js App
 
+- In `package.json`:
+
+```
+"scripts": {
+  "dev": "next",
+  "build": "next build",
+  "start": "next start"
+}
+```
+
+- Build for production: `npm run build`
+- Start app: `npm run start`
+- To run multiple instances
+  - in `package.json`, `"start": "next start -p $PORT"`
+  - start:
+    - `PORT=8000 npm start`
+    - `PORT=9000 npm start`
+
 # Troubleshooting
 
 - Page updates not reflected automatically, and you get `Watchpack Error (watcher): Error: ENOSPC: System limit for number of file watchers reached, watch '<directory>'` on the console
