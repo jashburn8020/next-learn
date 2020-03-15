@@ -315,6 +315,79 @@ This is our blog post.
 
 # API Routes
 
+- API Routes are lambdas (a.k.a serverless functions) running on Node
+- Every file inside `pages/api` is an API Route
+- API routes provide built-in middlewares which parse the incoming `req`, like `req.query`
+- Install `swr` (React Hooks library for remote data fetching)
+  - `npm install swr`
+- In `pages/api/randomQuote.js`:
+
+```
+import allQuotes from "../../quotes.json";
+
+export default (req, res) => {
+  const { author } = req.query;
+  let quotes = allQuotes;
+
+  if (author) {
+    quotes = quotes.filter(quote =>
+      quote.author.toLowerCase().includes(author.toLowerCase())
+    );
+  }
+  if (!quotes.length) {
+    quotes = allQuotes.filter(
+      quote => quote.author.toLowerCase() === "unknown"
+    );
+  }
+
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+
+  res.status(200).json(quote);
+};
+```
+
+- In `pages/random_quote.js`:
+
+```
+import { useRouter } from "next/router";
+import useSWR from "swr";
+
+function fetcher(url) {
+  return fetch(url).then(r => r.json());
+}
+
+export default function Index() {
+  const { query } = useRouter();
+  const { data, error } = useSWR(
+    `/api/randomQuote${query.author ? "?author=" + query.author : ""}`,
+    fetcher
+  );
+  // The following line has optional chaining, added in Next.js v9.1.5,
+  // is the same as `data && data.author`
+  const author = data?.author;
+  let quote = data?.quote;
+
+  if (!data) quote = "Loading...";
+  if (error) quote = "Failed to fetch the quote.";
+
+  return (
+    <main className="center">
+      <div className="quote">{quote}</div>
+      {author && <span className="author">- {author}</span>}
+
+      <style jsx>{`
+        ...
+      `}</style>
+    </main>
+  );
+}
+
+```
+
+- See <https://nextjs.org/docs/api-routes/api-middlewares>
+
+# Deploying a Next.js App
+
 # Troubleshooting
 
 - Page updates not reflected automatically, and you get `Watchpack Error (watcher): Error: ENOSPC: System limit for number of file watchers reached, watch '<directory>'` on the console
@@ -334,4 +407,5 @@ This is our blog post.
 - "Learn - Fetching Data for Pages." <https://nextjs.org/learn/basics/fetching-data-for-pages>.
 - "Learn - Styling Components." <https://nextjs.org/learn/basics/styling-components>.
 - "Learn - API Routes." <https://nextjs.org/learn/basics/api-routes>.
+- "Learn - Deploying a Next.js App." <https://nextjs.org/learn/basics/deploying-a-nextjs-app>.
 - "Increasing the amount of inotify watchers." <https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers>.
